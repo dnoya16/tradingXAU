@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XAU/USD Institutional Signal Terminal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon"></div>
+                <div class="logo-text">
+                    <h1>XAU/USD</h1>
+                    <span data-i18n="logo-sub">INSTITUTIONAL SIGNAL TERMINAL</span>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-item">
+                    <span class="status-label" data-i18n="header-lang">LANGUAGE / ភាសា</span>
+                    <select id="lang-select" class="lang-select">
+                        <option value="en">English</option>
+                        <option value="kh">ភាសាខ្មែរ</option>
+                    </select>
+                </div>
+                <div class="status-item">
+                    <span class="status-label" data-i18n="header-time">TIME</span>
+                    <span class="status-value" id="current-time">2026-06-22 07:58:00 UTC</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label" data-i18n="header-feed">FEED</span>
+                    <span class="status-value active-pulse" id="feed-status-val" data-i18n="header-live">LIVE DATA</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main">
+            <!-- LEFT COLUMN: CONTROLS & INPUTS -->
+            <section class="panel panel-controls">
+                <div class="panel-header">
+                    <h2><span class="step-num">★</span> <span data-i18n="panel-title">Analysis Parameters</span></h2>
+                    <button class="btn btn-secondary btn-sm" id="reset-btn" data-i18n="btn-reset">Reset Defaults</button>
+                </div>
+                
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="tab-trend" data-i18n="tab-trend">Trend & S/R</button>
+                    <button class="tab-btn" data-tab="tab-smc" data-i18n="tab-smc">SMC & Liquidity</button>
+                    <button class="tab-btn" data-tab="tab-risk" data-i18n="tab-risk">Risk & Fund</button>
+                </div>
+
+                <div class="tab-content" id="tab-trend">
+                    <!-- STEP 1: TREND ANALYSIS -->
+                    <div class="control-section">
+                        <h3><span class="section-num">01</span> <span data-i18n="sec-trend">Trend Analysis (Timeframes)</span></h3>
+                        <div class="timeframe-grid">
+                            <div class="tf-row">
+                                <label data-i18n="label-mn">Monthly (MN)</label>
+                                <div class="toggle-group" data-param="trend-mn">
+                                    <button class="toggle-btn active" data-val="Bullish" data-i18n="val-bull">BULL</button>
+                                    <button class="toggle-btn" data-val="Bearish" data-i18n="val-bear">BEAR</button>
+                                    <button class="toggle-btn" data-val="Range" data-i18n="val-range">RANGE</button>
+                                </div>
+                            </div>
+                            <div class="tf-row">
+                                <label data-i18n="label-w1">Weekly (W1)</label>
+                                <div class="toggle-group" data-param="trend-w1">
+                                    <button class="toggle-btn" data-val="Bullish" data-i18n="val-bull">BULL</button>
+                                    <button class="toggle-btn active" data-val="Bearish" data-i18n="val-bear">BEAR</button>
+                                    <button class="toggle-btn" data-val="Range" data-i18n="val-range">RANGE</button>
+                                </div>
+                            </div>
+                            <div class="tf-row">
+                                <label data-i18n="label-d1">Daily (D1)</label>
+                                <div class="toggle-group" data-param="trend-d1">
+                                    <button class="toggle-btn" data-val="Bullish" data-i18n="val-bull">BULL</button>
+                                    <button class="toggle-btn active" data-val="Bearish" data-i18n="val-bear">BEAR</button>
+                                    <button class="toggle-btn" data-val="Range" data-i18n="val-range">RANGE</button>
+                                </div>
+                            </div>
+                            <div class="tf-row">
+                                <label data-i18n="label-h4">4-Hour (H4)</label>
+                                <div class="toggle-group" data-param="trend-h4">
+                                    <button class="toggle-btn" data-val="Bullish" data-i18n="val-bull">BULL</button>
+                                    <button class="toggle-btn active" data-val="Bearish" data-i18n="val-bear">BEAR</button>
+                                    <button class="toggle-btn" data-val="Range" data-i18n="val-range">RANGE</button>
+                                </div>
+                            </div>
+                            <div class="tf-row">
+                                <label data-i18n="label-h1">1-Hour (H1)</label>
+                                <div class="toggle-group" data-param="trend-h1">
+                                    <button class="toggle-btn" data-val="Bullish" data-i18n="val-bull">BULL</button>
+                                    <button class="toggle-btn active" data-val="Bearish" data-i18n="val-bear">BEAR</button>
+                                    <button class="toggle-btn" data-val="Range" data-i18n="val-range">RANGE</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: SUPPORT AND RESISTANCE -->
+                    <div class="control-section">
+                        <h3><span class="section-num">02</span> <span data-i18n="sec-sr">Support & Resistance Levels</span></h3>
+                        <div class="sr-inputs">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-r1">Resistance 1 Level</label>
+                                    <input type="number" id="input-r1" value="4173" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-strength">Strength</label>
+                                    <select id="strength-r1">
+                                        <option value="Strong" data-i18n="opt-strong">Strong</option>
+                                        <option value="Medium" data-i18n="opt-medium" selected>Medium</option>
+                                        <option value="Weak" data-i18n="opt-weak">Weak</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-r2">Resistance 2 Level</label>
+                                    <input type="number" id="input-r2" value="4200" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-strength">Strength</label>
+                                    <select id="strength-r2">
+                                        <option value="Strong" data-i18n="opt-strong" selected>Strong</option>
+                                        <option value="Medium" data-i18n="opt-medium">Medium</option>
+                                        <option value="Weak" data-i18n="opt-weak">Weak</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <hr class="divider">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-s1">Support 1 Level</label>
+                                    <input type="number" id="input-s1" value="4145" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-strength">Strength</label>
+                                    <select id="strength-s1">
+                                        <option value="Strong" data-i18n="opt-strong">Strong</option>
+                                        <option value="Medium" data-i18n="opt-medium" selected>Medium</option>
+                                        <option value="Weak" data-i18n="opt-weak">Weak</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-s2">Support 2 Level</label>
+                                    <input type="number" id="input-s2" value="4120" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-strength">Strength</label>
+                                    <select id="strength-s2">
+                                        <option value="Strong" data-i18n="opt-strong" selected>Strong</option>
+                                        <option value="Medium" data-i18n="opt-medium">Medium</option>
+                                        <option value="Weak" data-i18n="opt-weak">Weak</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content hidden" id="tab-smc">
+                    <!-- STEP 3: SUPPLY & DEMAND ZONES -->
+                    <div class="control-section">
+                        <h3><span class="section-num">03</span> <span data-i18n="sec-zones">Supply & Demand Zones</span></h3>
+                        <div class="zone-inputs">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-supply-top">Supply Zone (Top)</label>
+                                    <input type="number" id="input-supply-top" value="4190" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-supply-bottom">Supply Zone (Bottom)</label>
+                                    <input type="number" id="input-supply-bottom" value="4175" step="0.5">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-demand-top">Demand Zone (Top)</label>
+                                    <input type="number" id="input-demand-top" value="4135" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-demand-bottom">Demand Zone (Bottom)</label>
+                                    <input type="number" id="input-demand-bottom" value="4120" step="0.5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4 & 5: LIQUIDITY & STRUCTURE -->
+                    <div class="control-section">
+                        <h3><span class="section-num">04</span> <span data-i18n="sec-smc">SMC Indicators</span></h3>
+                        
+                        <label class="control-label" data-i18n="label-liquidity">Liquidity Sweeps</label>
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="check-bsl-sweep">
+                                <span class="checkmark"></span>
+                                <span data-i18n="label-bsl">Buy-Side Liquidity (BSL) Swept</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="check-ssl-sweep">
+                                <span class="checkmark"></span>
+                                <span data-i18n="label-ssl">Sell-Side Liquidity (SSL) Swept</span>
+                            </label>
+                        </div>
+
+                        <label class="control-label mt-3" data-i18n="label-mss">Market Structure Shifts</label>
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="check-bos">
+                                <span class="checkmark"></span>
+                                <span data-i18n="label-bos">Break of Structure (BOS)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="check-choch">
+                                <span class="checkmark"></span>
+                                <span data-i18n="label-choch">Change of Character (CHOCH)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- STEP 6: CANDLE CONFIRMATION -->
+                    <div class="control-section">
+                        <h3><span class="section-num">05</span> <span data-i18n="sec-candle">Candlestick Confirmation</span></h3>
+                        <div class="form-group">
+                            <label data-i18n="label-pattern">Confirmation Pattern</label>
+                            <select id="candle-confirmation">
+                                <option value="None" data-i18n="opt-none">None / No Confirmation</option>
+                                <option value="Bullish Engulfing" data-i18n="opt-bull-eng">Bullish Engulfing</option>
+                                <option value="Bearish Engulfing" data-i18n="opt-bear-eng">Bearish Engulfing</option>
+                                <option value="Pin Bar" data-i18n="opt-pinbar">Pin Bar (Rejection)</option>
+                                <option value="Momentum Candle" data-i18n="opt-momentum">Momentum Candle</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content hidden" id="tab-risk">
+                    <!-- API CONFIGURATIONS -->
+                    <div class="control-section">
+                        <h3><span class="section-num">⚙</span> <span data-i18n="sec-api-config">API Settings</span></h3>
+                        <div class="form-group">
+                            <label data-i18n="label-finnhub-key">Finnhub API Key (Optional)</label>
+                            <input type="password" id="input-api-key" placeholder="Enter Finnhub API Key...">
+                        </div>
+                    </div>
+
+                    <!-- STEP 7: FUNDAMENTALS -->
+                    <div class="control-section">
+                        <h3><span class="section-num">06</span> <span data-i18n="sec-fundamentals">Fundamental Filters</span></h3>
+                        <div class="fundamental-toggles">
+                            <div class="tf-row">
+                                <label data-i18n="label-dxy">USD Index Trend (DXY)</label>
+                                <div class="toggle-group" data-param="dxy-strength">
+                                    <button class="toggle-btn active" data-val="Strong" data-i18n="val-strong">STRONG</button>
+                                    <button class="toggle-btn" data-val="Weak" data-i18n="val-weak">WEAK</button>
+                                </div>
+                            </div>
+                            <div class="tf-row">
+                                <label data-i18n="label-fed">Fed Stance</label>
+                                <div class="toggle-group" data-param="fed-stance">
+                                    <button class="toggle-btn active" data-val="Hawkish" data-i18n="val-hawk">HAWKISH</button>
+                                    <button class="toggle-btn" data-val="Dovish" data-i18n="val-dov">DOVISH</button>
+                                </div>
+                            </div>
+                            <div class="tf-row">
+                                <label data-i18n="label-geo">Geopolitical Risk</label>
+                                <div class="toggle-group" data-param="geo-risk">
+                                    <button class="toggle-btn" data-val="Opposing" data-i18n="val-opp">OPPOSING</button>
+                                    <button class="toggle-btn active" data-val="Supporting" data-i18n="val-supp">SUPPORTING</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 8: RISK MANAGEMENT -->
+                    <div class="control-section">
+                        <h3><span class="section-num">07</span> <span data-i18n="sec-risk">Risk Management & Entry</span></h3>
+                        <div class="risk-inputs">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <label data-i18n="label-price">Current Price</label>
+                                        <span class="live-ticker-badge" id="live-ticker-badge" data-i18n="badge-live">● Live</span>
+                                    </div>
+                                    <input type="number" id="input-current-price" value="4138.2" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-entry">Entry Zone Limit</label>
+                                    <input type="number" id="input-entry-zone" value="4140" step="0.5">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-sl">Stop Loss (SL)</label>
+                                    <input type="number" id="input-stop-loss" value="4125" step="0.5">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n="label-tp1">Take Profit 1 (TP1)</label>
+                                    <input type="number" id="input-tp1" value="4170" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label-tp2">Take Profit 2 (TP2)</label>
+                                    <input type="number" id="input-tp2" value="4195" step="0.5">
+                                </div>
+                            </div>
+                            
+                            <div class="rr-badge-container">
+                                <div class="rr-display-card">
+                                    <span class="rr-title" data-i18n="label-rr">Calculated RR Ratio</span>
+                                    <span class="rr-value" id="val-rr-ratio">1:3.78</span>
+                                    <span class="rr-status valid" id="val-rr-status">✓ Exceeds 1:3 Preferred</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: CHART & SIGNAL ENGINE -->
+            <section class="panel-visualization">
+                <!-- CHART CONTAINER -->
+                <div class="panel panel-chart">
+                    <div class="panel-header">
+                        <h2><span class="step-num">■</span> <span data-i18n="sec-chart-title">Live Technical Setup</span></h2>
+                        <div class="legend">
+                            <span class="legend-item"><span class="legend-dot color-supply"></span><span data-i18n="legend-supply">Supply</span></span>
+                            <span class="legend-item"><span class="legend-dot color-demand"></span><span data-i18n="legend-demand">Demand</span></span>
+                            <span class="legend-item"><span class="legend-dot color-entry"></span><span data-i18n="legend-entry">Entry</span></span>
+                            <span class="legend-item"><span class="legend-dot color-sl"></span><span data-i18n="legend-sl">SL</span></span>
+                            <span class="legend-item"><span class="legend-dot color-tp"></span><span data-i18n="legend-tp">TP</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-wrapper">
+                        <!-- Chart SVG -->
+                        <svg id="svg-chart" viewBox="0 0 800 400" preserveAspectRatio="none">
+                            <!-- SVG elements injected dynamically via app.js -->
+                        </svg>
+                        <div class="chart-no-data hidden" id="chart-overlay">No active zones to draw.</div>
+                    </div>
+                </div>
+
+                <!-- SIGNAL OUTPUT -->
+                <div class="panel panel-signal">
+                    <div class="signal-grid">
+                        <div class="signal-main-card">
+                            <span class="card-subtitle" data-i18n="card-signal">SIGNAL OUTPUT</span>
+                            <div class="signal-direction no-trade" id="signal-badge">
+                                <span class="pulse-ring"></span>
+                                <span class="badge-text" id="signal-text">NO TRADE</span>
+                            </div>
+                            <div class="confidence-bar-container">
+                                <div class="confidence-label">
+                                    <span data-i18n="label-confidence">Signal Confidence</span>
+                                    <span id="confidence-percentage">0%</span>
+                                </div>
+                                <div class="confidence-track">
+                                    <div class="confidence-fill" id="confidence-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="signal-summary-card">
+                            <span class="card-subtitle" data-i18n="card-rationale">SYSTEM STATUS & RATIONALE</span>
+                            <div class="validation-list" id="signal-rationale">
+                                <!-- Dynamic check-list elements will go here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="signal-export-area">
+                        <div class="export-header">
+                            <span class="card-subtitle" data-i18n="card-report">INSTITUTIONAL SIGNAL REPORT</span>
+                            <button class="btn btn-primary btn-sm" id="copy-signal-btn">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                <span data-i18n="btn-copy">Copy Signal Report</span>
+                            </button>
+                        </div>
+                        <div class="code-container">
+                            <pre><code id="export-text">Loading report...</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
