@@ -1157,9 +1157,9 @@ This is financial market analysis only and not financial advice.`;
 
     // Fetch live Gold spot price from Finnhub (fallback to Binance PAXGUSDT)
     async function fetchLivePrice() {
-        // If the user has not configured their Finnhub API Key, skip directly to Binance PAXGUSDT
+        // If the user has not configured their Finnhub API Key, skip directly to Kraken PAXGUSD
         if (!state.apiKey) {
-            await fetchBinanceFallback("No Finnhub Key");
+            await fetchKrakenFallback("No Finnhub Key");
             return;
         }
 
@@ -1190,18 +1190,20 @@ This is financial market analysis only and not financial advice.`;
                 throw new Error('Invalid price data from Finnhub');
             }
         } catch (err) {
-            console.warn('Finnhub failed, falling back to Binance PAXGUSDT:', err);
-            await fetchBinanceFallback(err);
+            console.warn('Finnhub failed, falling back to Kraken PAXGUSD:', err);
+            await fetchKrakenFallback(err);
         }
     }
 
-    // Helper to query Binance Pax Gold ticker when Finnhub is offline or keyless
-    async function fetchBinanceFallback(reason) {
+    // Helper to query Kraken Pax Gold ticker when Finnhub is offline or keyless
+    async function fetchKrakenFallback(reason) {
         try {
-            const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
-            if (!res.ok) throw new Error('Binance connection error');
+            const res = await fetch('https://api.kraken.com/0/public/Ticker?pair=PAXGUSD');
+            if (!res.ok) throw new Error('Kraken connection error');
             const data = await res.json();
-            const price = parseFloat(data.price);
+            
+            // Extract last trade price from Kraken PAXGUSD response
+            const price = parseFloat(data.result.PAXGUSD.c[0]);
             
             if (price && !isNaN(price)) {
                 state.currentPrice = price;
@@ -1214,15 +1216,15 @@ This is financial market analysis only and not financial advice.`;
                 if (badge) {
                     badge.classList.remove('offline');
                     badge.setAttribute('data-i18n', 'badge-live-paxg');
-                    badge.textContent = i18n[state.lang]['badge-live-paxg'];
+                    badge.textContent = state.lang === 'kh' ? '● ផ្សាយផ្ទាល់ (PAXG)' : '● Live (PAXG)';
                 }
                 
                 evaluateAndRender();
             } else {
-                throw new Error('Invalid price data from Binance');
+                throw new Error('Invalid price data from Kraken');
             }
-        } catch (binanceErr) {
-            console.error('All price feeds failed. Reason:', reason, 'Binance err:', binanceErr);
+        } catch (krakenErr) {
+            console.error('All price feeds failed. Reason:', reason, 'Kraken err:', krakenErr);
             const badge = document.getElementById('live-ticker-badge');
             if (badge) {
                 badge.classList.add('offline');
@@ -1232,15 +1234,24 @@ This is financial market analysis only and not financial advice.`;
         }
     }
 
-    // Fetch actual historical Gold candles from Binance
+    // Fetch actual historical Gold candles from Kraken
     async function fetchHistoricalCandles() {
+        const intervalMap = {
+            '1h': 60,
+            '4h': 240,
+            '1d': 1440,
+            '1w': 10080
+        };
+        const krakenInterval = intervalMap[state.chartTimeframe] || 240;
+
         try {
-            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${state.chartTimeframe}&limit=16`);
-            if (!res.ok) throw new Error('Binance klines connection error');
+            const res = await fetch(`https://api.kraken.com/0/public/OHLC?pair=PAXGUSD&interval=${krakenInterval}`);
+            if (!res.ok) throw new Error('Kraken OHLC connection error');
             const data = await res.json();
             
-            if (data && Array.isArray(data)) {
-                state.historicalCandles = data.map(k => ({
+            if (data && data.result && data.result.PAXGUSD) {
+                const klines = data.result.PAXGUSD;
+                state.historicalCandles = klines.slice(-16).map(k => ({
                     open: parseFloat(k[1]),
                     high: parseFloat(k[2]),
                     low: parseFloat(k[3]),
