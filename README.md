@@ -1,0 +1,2 @@
+# tradingXAU
+XAU/USD signal
