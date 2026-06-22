@@ -331,7 +331,15 @@
                 <!-- CHART CONTAINER -->
                 <div class="panel panel-chart">
                     <div class="panel-header">
-                        <h2><span class="step-num">■</span> <span data-i18n="sec-chart-title">Live Technical Setup</span></h2>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <h2><span class="step-num">■</span> <span data-i18n="sec-chart-title">Live Technical Setup</span></h2>
+                            <select id="chart-tf-select" class="lang-select" style="padding: 2px 6px;">
+                                <option value="1h">1H</option>
+                                <option value="4h" selected>4H</option>
+                                <option value="1d">1D</option>
+                                <option value="1w">1W</option>
+                            </select>
+                        </div>
                         <div class="legend">
                             <span class="legend-item"><span class="legend-dot color-supply"></span><span data-i18n="legend-supply">Supply</span></span>
                             <span class="legend-item"><span class="legend-dot color-demand"></span><span data-i18n="legend-demand">Demand</span></span>

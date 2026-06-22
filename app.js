@@ -50,7 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
         entryZone: 4140.0,
         stopLoss: 4125.0,
         tp1: 4170.0,
-        tp2: 4195.0
+        tp2: 4195.0,
+
+        // Chart parameters
+        chartTimeframe: '4h',
+        historicalCandles: []
     };
 
     // Dictionary mappings for English and Khmer
@@ -297,7 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Chart
         svgChart: document.getElementById('svg-chart'),
-        chartOverlay: document.getElementById('chart-overlay')
+        chartOverlay: document.getElementById('chart-overlay'),
+        chartTfSelect: document.getElementById('chart-tf-select')
     };
 
     // Initialize clock
@@ -447,6 +452,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchLivePrice();
     });
 
+    if (elements.chartTfSelect) {
+        elements.chartTfSelect.addEventListener('change', () => {
+            state.chartTimeframe = elements.chartTfSelect.value;
+            fetchHistoricalCandles();
+        });
+    }
+
     // Synchronize UI inputs to match internal state (for resets/init)
     function syncUIFromState() {
         elements.langSelect.value = state.lang;
@@ -477,6 +489,10 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.inputStopLoss.value = state.stopLoss;
         elements.inputTp1.value = state.tp1;
         elements.inputTp2.value = state.tp2;
+
+        if (elements.chartTfSelect) {
+            elements.chartTfSelect.value = state.chartTimeframe;
+        }
 
         // Reset toggles visual state
         document.querySelectorAll('.toggle-group').forEach(group => {
@@ -849,6 +865,38 @@ This is financial market analysis only and not financial advice.`;
         
         const w = 800;
         const h = 400;
+
+        // Setup chart candles (real historical or mock fallback)
+        const totalCandles = 16;
+        let candlesToRender = [];
+        if (state.historicalCandles && state.historicalCandles.length >= totalCandles) {
+            candlesToRender = state.historicalCandles.slice(-totalCandles);
+        } else {
+            // Setup mock prices that fit the bias trend
+            const isBullishBias = overallBias === 'Bullish';
+            let runningPrice = state.currentPrice - 20;
+            
+            for (let i = 0; i < totalCandles; i++) {
+                const trendDir = isBullishBias ? (i > 9 ? 1.4 : -0.7) : (i > 9 ? -1.4 : 0.7);
+                const noise = (Math.random() - 0.5) * 10;
+                const open = runningPrice;
+                const close = runningPrice + trendDir * 5 + noise;
+                
+                const high = Math.max(open, close) + Math.random() * 3;
+                const low = Math.min(open, close) - Math.random() * 3;
+                
+                candlesToRender.push({ open, close, high, low });
+                runningPrice = close;
+            }
+        }
+
+        // Adjust last candle close to currentPrice
+        const lastCandle = candlesToRender[candlesToRender.length - 1];
+        if (lastCandle) {
+            lastCandle.close = state.currentPrice;
+            if (state.currentPrice > lastCandle.high) lastCandle.high = state.currentPrice;
+            if (state.currentPrice < lastCandle.low) lastCandle.low = state.currentPrice;
+        }
         
         // Find min and max values to dynamically scale price coordinates to SVG height
         const prices = [
@@ -858,6 +906,10 @@ This is financial market analysis only and not financial advice.`;
             state.currentPrice, state.entryZone,
             state.stopLoss, state.tp1, state.tp2
         ];
+        candlesToRender.forEach(c => {
+            prices.push(c.high);
+            prices.push(c.low);
+        });
         
         const minVal = Math.min(...prices) - 5;
         const maxVal = Math.max(...prices) + 5;
@@ -962,37 +1014,12 @@ This is financial market analysis only and not financial advice.`;
             elements.svgChart.appendChild(txt);
         });
 
-        // Draw Mock Candlestick Chart data
-        const totalCandles = 16;
+        // Draw Candlestick Chart data
         const startX = 80;
         const spacing = (w - 180) / totalCandles;
-        
-        // Setup mock prices that fit the bias trend
-        const isBullishBias = overallBias === 'Bullish';
-        const mockCandles = [];
-        let runningPrice = isBullishBias ? minVal + range * 0.35 : maxVal - range * 0.35;
-        
-        for (let i = 0; i < totalCandles; i++) {
-            const trendDir = isBullishBias ? (i > 9 ? 1.4 : -0.7) : (i > 9 ? -1.4 : 0.7);
-            const noise = (Math.random() - 0.5) * (range * 0.1);
-            const open = runningPrice;
-            const close = runningPrice + trendDir * (range * 0.05) + noise;
-            
-            const high = Math.max(open, close) + Math.random() * (range * 0.03);
-            const low = Math.min(open, close) - Math.random() * (range * 0.03);
-            
-            mockCandles.push({ open, close, high, low });
-            runningPrice = close;
-        }
 
-        // Adjust last candle close to currentPrice
-        const lastCandle = mockCandles[totalCandles - 1];
-        lastCandle.close = state.currentPrice;
-        if (state.currentPrice > lastCandle.high) lastCandle.high = state.currentPrice;
-        if (state.currentPrice < lastCandle.low) lastCandle.low = state.currentPrice;
-
-        // Render mock candles
-        mockCandles.forEach((candle, idx) => {
+        // Render candles
+        candlesToRender.forEach((candle, idx) => {
             const cx = startX + idx * spacing;
             const yOpen = valToY(candle.open);
             const yClose = valToY(candle.close);
@@ -1205,11 +1232,36 @@ This is financial market analysis only and not financial advice.`;
         }
     }
 
+    // Fetch actual historical Gold candles from Binance
+    async function fetchHistoricalCandles() {
+        try {
+            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${state.chartTimeframe}&limit=16`);
+            if (!res.ok) throw new Error('Binance klines connection error');
+            const data = await res.json();
+            
+            if (data && Array.isArray(data)) {
+                state.historicalCandles = data.map(k => ({
+                    open: parseFloat(k[1]),
+                    high: parseFloat(k[2]),
+                    low: parseFloat(k[3]),
+                    close: parseFloat(k[4])
+                }));
+                evaluateAndRender();
+            }
+        } catch (err) {
+            console.error('Error fetching historical candles:', err);
+        }
+    }
+
     // Run first evaluation
     syncUIFromState();
     evaluateAndRender();
+    fetchHistoricalCandles();
 
     // Start live pricing feed (every 5 seconds)
     fetchLivePrice();
-    setInterval(fetchLivePrice, 5000);
+    setInterval(() => {
+        fetchLivePrice();
+        fetchHistoricalCandles();
+    }, 5000);
 });
